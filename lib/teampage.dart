@@ -36,9 +36,7 @@ class teampage extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(60),
-              child: Image.network(
-                'https://rectangular-shape-82a.notion.site/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F8809b63e-8d46-4946-a5e0-4a71a1d45e5b%2F8team.png?id=575e603a-56c4-4aee-b463-f9e93beb8efd&table=block&spaceId=6b9ebab3-09ea-4406-a18e-30ecb1ca7abb&width=2000&userId=&cache=v2',
-              ),
+              child: Image.asset('images/8team.png'),
             ),
             SizedBox(height: 10),
             Container(

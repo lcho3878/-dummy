@@ -124,11 +124,12 @@ class _TeamMemberState extends State<TeamMember> {
                         children: [
                           Container(
                             height: 240,
-                            width: 180,
+                            width: 200,
                             child: GestureDetector(
-                              child: Image.file(File(MemberService
-                                  .memberlist[index]
-                                  .imagepath)), //이미지 해결전엔 일단 아무이미지
+                              child: Image.file(
+                                  File(MemberService
+                                      .memberlist[index].imagepath),
+                                  fit: BoxFit.cover), //이미지 해결전엔 일단 아무이미지
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -149,7 +150,11 @@ class _TeamMemberState extends State<TeamMember> {
                               Text(
                                   'MBTI : ${MemberService.memberlist[index].mbti}'),
                               Text(
-                                  '좋아하는 것 : ${MemberService.memberlist[index].hobby}'),
+                                  '장점 : ${MemberService.memberlist[index].advantage}'),
+                              Text(
+                                  '협업스타일 : ${MemberService.memberlist[index].cooperation}'),
+                              Text(
+                                  '블로그 : ${MemberService.memberlist[index].blog}'),
                             ],
                           )
                         ],
@@ -209,7 +214,9 @@ class _MemberAddState extends State<MemberAdd> {
 
     final nameController = TextEditingController();
     final mbtiController = TextEditingController();
-    final hobbyController = TextEditingController();
+    final advantageController = TextEditingController();
+    final cooperationController = TextEditingController();
+    final blogController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -247,8 +254,14 @@ class _MemberAddState extends State<MemberAdd> {
                       ),
                       TextButton(
                         onPressed: () {
-                          memberService.memberAdd(memberService, nameController,
-                              mbtiController, hobbyController, _image!.path);
+                          memberService.memberAdd(
+                              memberService,
+                              nameController,
+                              mbtiController,
+                              advantageController,
+                              cooperationController,
+                              blogController,
+                              _image!.path);
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
@@ -300,8 +313,16 @@ class _MemberAddState extends State<MemberAdd> {
             decoration: const InputDecoration(labelText: 'MBTI'),
           ),
           TextFormField(
-            controller: hobbyController,
-            decoration: const InputDecoration(labelText: '취미'),
+            controller: advantageController,
+            decoration: const InputDecoration(labelText: '장점'),
+          ),
+          TextFormField(
+            controller: cooperationController,
+            decoration: const InputDecoration(labelText: '협업 스타일'),
+          ),
+          TextFormField(
+            controller: blogController,
+            decoration: const InputDecoration(labelText: '블로그'),
           ),
         ],
       ),
@@ -337,7 +358,10 @@ class _MemberDetailState extends State<MemberDetail> {
 
     final nameController = TextEditingController(text: member.name);
     final mbtiController = TextEditingController(text: member.mbti);
-    final hobbyController = TextEditingController(text: member.hobby);
+    final advantageController = TextEditingController(text: member.advantage);
+    final cooperationController =
+        TextEditingController(text: member.cooperation);
+    final blogController = TextEditingController(text: member.blog);
     // 이미 들어가있는 회원 정보를 기본값으로 받기위해 사용
 
     return Scaffold(
@@ -382,7 +406,9 @@ class _MemberDetailState extends State<MemberDetail> {
                             widget.index,
                             nameController,
                             mbtiController,
-                            hobbyController,
+                            advantageController,
+                            cooperationController,
+                            blogController,
                           );
                           Navigator.pop(context);
                           Navigator.pop(context);
@@ -463,8 +489,16 @@ class _MemberDetailState extends State<MemberDetail> {
             decoration: const InputDecoration(labelText: 'MBTI'),
           ),
           TextFormField(
-            controller: hobbyController,
-            decoration: const InputDecoration(labelText: '취미'),
+            controller: advantageController,
+            decoration: const InputDecoration(labelText: '장점'),
+          ),
+          TextFormField(
+            controller: cooperationController,
+            decoration: const InputDecoration(labelText: '협업 스타일'),
+          ),
+          TextFormField(
+            controller: blogController,
+            decoration: const InputDecoration(labelText: '블로그'),
           ),
         ],
       ),

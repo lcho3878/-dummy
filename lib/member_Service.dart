@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'main.dart';
 
@@ -8,20 +7,26 @@ class Member {
   Member({
     required this.name,
     required this.mbti,
-    required this.hobby,
+    required this.advantage,
+    required this.cooperation,
+    required this.blog,
     required this.imagepath,
   });
 
   String name;
   String mbti;
-  String hobby;
+  String advantage;
+  String cooperation;
+  String blog;
   String imagepath;
 
   Map toJson() {
     return {
       'name': name,
       'mbti': mbti,
-      'hobby': hobby,
+      'advantage': advantage,
+      'cooperation': cooperation,
+      'blog': blog,
       'imagepath': imagepath,
     };
   }
@@ -30,7 +35,9 @@ class Member {
     return Member(
       name: json['name'],
       mbti: json['mbti'],
-      hobby: json['hobby'],
+      advantage: json['advantage'],
+      cooperation: json['cooperation'],
+      blog: json['blog'],
       imagepath: json['imagepath'],
     );
   }
@@ -66,11 +73,15 @@ class MemberService extends ChangeNotifier {
     index,
     nameController,
     mbtiController,
-    hobbyController,
+    advantageController,
+    cooperationController,
+    blogController,
   ) {
     memberService.memberlist[index].name = nameController.text;
     memberService.memberlist[index].mbti = mbtiController.text;
-    memberService.memberlist[index].hobby = hobbyController.text;
+    memberService.memberlist[index].advantage = advantageController.text;
+    memberService.memberlist[index].cooperation = cooperationController.text;
+    memberService.memberlist[index].blog = blogController.text;
 
     saveMemberList();
     notifyListeners();
@@ -98,17 +109,23 @@ class MemberService extends ChangeNotifier {
     memberService,
     nameController,
     mbtiController,
-    hobbyController,
+    advantageController,
+    cooperationController,
+    blogController,
     imagepath,
   ) {
     String name = nameController.text;
     String mbti = mbtiController.text;
-    String hobby = hobbyController.text;
+    String advantage = advantageController.text;
+    String cooperation = cooperationController.text;
+    String blog = blogController.text;
 
     Member newmember = Member(
       name: name,
       mbti: mbti,
-      hobby: hobby,
+      advantage: advantage,
+      cooperation: cooperation,
+      blog: blog,
       imagepath: imagepath,
     );
     memberService.memberlist.add(newmember);
