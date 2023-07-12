@@ -1,8 +1,24 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:teampage/teampage.dart';
+import 'package:teampage/member_Service.dart';
+import 'package:image_picker/image_picker.dart';
 
-void main() {
-  runApp(const MyApp());
+late SharedPreferences prefs;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  prefs = await SharedPreferences.getInstance();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => MemberService()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -71,108 +87,131 @@ class TeamMember extends StatefulWidget {
 }
 
 class _TeamMemberState extends State<TeamMember> {
-  List name = ['노진구', '도라에몽', '도라미'];
-  List hobby = ['이슬이', '단팥빵', '집안일'];
-  List imgUrl = [
-    'https://w7.pngwing.com/pngs/1010/781/png-transparent-doraemon-nobita-character-nobita-nobi-doraemon-character-youtube-real-life-doraemon-television-child-hand.png',
-    'https://img.extmovie.com/files/attach/images/174/500/322/005/b8a36bfbe9ab62a7e89ff08505d49adf.png',
-    'https://i.namu.wiki/i/vHdDMJ9YXTWSDhLKE4iy9bvIlzKgJPnXxfWKgAB5cTxS1ssE5ygBllWIX_fSvUVIR7dYfP-6jccPdnStCwMr9w.webp',
-  ];
-  List mbti = ['ISTP', 'ENFJ', 'ESTP'];
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '팀원 소개',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-      ),
-      body: name.isEmpty
-          ? Center(
-              child: Text(
-                '팀원을 등록해주세요',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+    return Consumer<MemberService>(
+      builder: (context, MemberService, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              '팀원 소개',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
               ),
-            )
-          : ListView.builder(
-              itemCount: name.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: double.infinity,
-                  height: 240,
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 240,
-                        width: 180,
-                        child: GestureDetector(
-                          child: Image.network(
-                            imgUrl[index],
-                            fit: BoxFit.cover,
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MemberDetail(
-                                  index: index,
-                                  hobby: hobby,
-                                  imgUrl: imgUrl,
-                                  mbti: mbti,
-                                  name: name,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('이름 : ${name[index]}'),
-                          Text('MBTI : ${mbti[index]}'),
-                          Text('좋아하는 것 : ${hobby[index]}'),
-                        ],
-                      )
-                    ],
-                  ),
-                );
-              },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => MemberAdd()),
-          );
-        },
-        backgroundColor: Color(0xFFFF7E36),
-        elevation: 1,
-        child: Icon(
-          Icons.add_rounded,
-          size: 36,
-        ),
-      ),
+            backgroundColor: Colors.white,
+            elevation: 0.5,
+          ),
+          body: MemberService.memberlist.isEmpty
+              ? Center(
+                  child: Text(
+                    '팀원을 등록해주세요',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: MemberService.memberlist.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: double.infinity,
+                      height: 240,
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 240,
+                            width: 180,
+                            child: GestureDetector(
+                              child: Image.network(
+                                'https://3.bp.blogspot.com/-ZKBbW7TmQD4/U6P_DTbE2MI/AAAAAAAADjg/wdhBRyLv5e8/s1600/noimg.gif',
+                                fit: BoxFit.cover,
+                              ), //이미지 해결전엔 일단 아무이미지
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MemberDetail(
+                                      index: index,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                  '이름 : ${MemberService.memberlist[index].name}'),
+                              Text(
+                                  'MBTI : ${MemberService.memberlist[index].mbti}'),
+                              Text(
+                                  '좋아하는 것 : ${MemberService.memberlist[index].hobby}'),
+                            ],
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        MemberAdd(index: MemberService.memberlist.length)),
+              );
+            },
+            backgroundColor: Color(0xFFFF7E36),
+            elevation: 1,
+            child: Icon(
+              Icons.add_rounded,
+              size: 36,
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
 //팀원 등록 페이지
-class MemberAdd extends StatelessWidget {
-  const MemberAdd({Key? key}) : super(key: key);
+class MemberAdd extends StatefulWidget {
+  const MemberAdd({
+    Key? key,
+    required this.index,
+  }) : super(key: key);
+  final index;
+
+  @override
+  State<MemberAdd> createState() => _MemberAddState();
+}
+
+class _MemberAddState extends State<MemberAdd> {
+  final ImagePicker _picker = ImagePicker();
+  PickedFile? _image;
+  Future _getImage() async {
+    PickedFile? image = await _picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      if (image != null) {
+        _image = PickedFile(image.path);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    MemberService memberService = context.read<MemberService>();
+
+    final nameController = TextEditingController();
+    final mbtiController = TextEditingController();
+    final hobbyController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -200,6 +239,23 @@ class MemberAdd extends StatelessWidget {
                 builder: (context) {
                   return AlertDialog(
                     title: Text('저장하겠습니까?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('취소'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          memberService.memberAdd(memberService, nameController,
+                              mbtiController, hobbyController);
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        },
+                        child: Text('저장'),
+                      ),
+                    ],
                   );
                 },
               );
@@ -217,31 +273,57 @@ class MemberAdd extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0.5,
       ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 300,
+            child: Card(
+              child: _image == null
+                  ? TextButton(
+                      onPressed: () {
+                        _getImage();
+                      },
+                      child: Text('사진추가'),
+                    )
+                  : GestureDetector(
+                      child: Image.file(File(_image!.path)),
+                      onTap: _getImage,
+                    ),
+            ),
+          ),
+          TextFormField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: '이름'),
+          ),
+          TextFormField(
+            controller: mbtiController,
+            decoration: const InputDecoration(labelText: 'MBTI'),
+          ),
+          TextFormField(
+            controller: hobbyController,
+            decoration: const InputDecoration(labelText: '취미'),
+          ),
+        ],
+      ),
     );
   }
 }
 
 //팀원 상세 설명 페이지
 class MemberDetail extends StatelessWidget {
-  const MemberDetail(
-      {Key? key,
-      required this.name,
-      required this.hobby,
-      required this.imgUrl,
-      required this.mbti,
-      required this.index})
-      : super(key: key);
+  MemberDetail({super.key, required this.index});
   final int index;
-  final List name;
-  final List hobby;
-  final List imgUrl;
-  final List mbti;
 
   @override
   Widget build(BuildContext context) {
-    final nameController = TextEditingController(text: name[index]);
-    final mbtiController = TextEditingController(text: mbti[index]);
-    final hobbyController = TextEditingController(text: hobby[index]);
+    MemberService memberService = context.read<MemberService>();
+    Member member = memberService.memberlist[index];
+
+    final nameController = TextEditingController(text: member.name);
+    final mbtiController = TextEditingController(text: member.mbti);
+    final hobbyController = TextEditingController(text: member.hobby);
+    // 이미 들어가있는 회원 정보를 기본값으로 받기위해 사용
 
     return Scaffold(
       appBar: AppBar(
@@ -263,25 +345,107 @@ class MemberDetail extends StatelessWidget {
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
+        actions: [
+          TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('저장하겠습니까?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('취소'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          memberService.memberSave(
+                            memberService,
+                            index,
+                            nameController,
+                            mbtiController,
+                            hobbyController,
+                          );
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        },
+                        child: Text('저장'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: Text(
+              '저장',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('삭제하겠습니까?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('취소'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          memberService.memberDelete(memberService, index);
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        },
+                        child: Text('삭제'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: Text(
+              '삭제',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
           Container(
             child: Image.network(
-              imgUrl[index],
-              fit: BoxFit.cover,
-            ),
+                'https://3.bp.blogspot.com/-ZKBbW7TmQD4/U6P_DTbE2MI/AAAAAAAADjg/wdhBRyLv5e8/s1600/noimg.gif',
+                fit: BoxFit.cover), // 여기도 기본이미지 일단 사용
             width: double.infinity,
             height: 400,
           ),
           TextFormField(
             controller: nameController,
+            decoration: const InputDecoration(labelText: '이름'),
           ),
           TextFormField(
             controller: mbtiController,
+            decoration: const InputDecoration(labelText: 'MBTI'),
           ),
           TextFormField(
             controller: hobbyController,
+            decoration: const InputDecoration(labelText: '취미'),
           ),
         ],
       ),
@@ -289,7 +453,7 @@ class MemberDetail extends StatelessWidget {
   }
 }
 
-//팀원 정보 수정 페이지
+//팀원 정보 수정 페이지 (이곳은 건든 부분 없음)
 class MemberAdjust extends StatelessWidget {
   const MemberAdjust({Key? key}) : super(key: key);
   @override
