@@ -126,10 +126,9 @@ class _TeamMemberState extends State<TeamMember> {
                             height: 240,
                             width: 180,
                             child: GestureDetector(
-                              child: Image.network(
-                                'https://3.bp.blogspot.com/-ZKBbW7TmQD4/U6P_DTbE2MI/AAAAAAAADjg/wdhBRyLv5e8/s1600/noimg.gif',
-                                fit: BoxFit.cover,
-                              ), //이미지 해결전엔 일단 아무이미지
+                              child: Image.file(File(MemberService
+                                  .memberlist[index]
+                                  .imagepath)), //이미지 해결전엔 일단 아무이미지
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -249,7 +248,7 @@ class _MemberAddState extends State<MemberAdd> {
                       TextButton(
                         onPressed: () {
                           memberService.memberAdd(memberService, nameController,
-                              mbtiController, hobbyController);
+                              mbtiController, hobbyController, _image!.path);
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
@@ -311,14 +310,30 @@ class _MemberAddState extends State<MemberAdd> {
 }
 
 //팀원 상세 설명 페이지
-class MemberDetail extends StatelessWidget {
+class MemberDetail extends StatefulWidget {
   MemberDetail({super.key, required this.index});
   final int index;
 
   @override
+  State<MemberDetail> createState() => _MemberDetailState();
+}
+
+class _MemberDetailState extends State<MemberDetail> {
+  @override
   Widget build(BuildContext context) {
+    final ImagePicker _picker = ImagePicker();
+    PickedFile? _image;
+    Future _getImage() async {
+      PickedFile? image = await _picker.getImage(source: ImageSource.gallery);
+      setState(() {
+        if (image != null) {
+          _image = PickedFile(image.path);
+        }
+      });
+    }
+
     MemberService memberService = context.read<MemberService>();
-    Member member = memberService.memberlist[index];
+    Member member = memberService.memberlist[widget.index];
 
     final nameController = TextEditingController(text: member.name);
     final mbtiController = TextEditingController(text: member.mbti);
@@ -364,7 +379,7 @@ class MemberDetail extends StatelessWidget {
                         onPressed: () {
                           memberService.memberSave(
                             memberService,
-                            index,
+                            widget.index,
                             nameController,
                             mbtiController,
                             hobbyController,
@@ -404,7 +419,8 @@ class MemberDetail extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          memberService.memberDelete(memberService, index);
+                          memberService.memberDelete(
+                              memberService, widget.index);
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
@@ -429,9 +445,12 @@ class MemberDetail extends StatelessWidget {
       body: Column(
         children: [
           Container(
-            child: Image.network(
-                'https://3.bp.blogspot.com/-ZKBbW7TmQD4/U6P_DTbE2MI/AAAAAAAADjg/wdhBRyLv5e8/s1600/noimg.gif',
-                fit: BoxFit.cover), // 여기도 기본이미지 일단 사용
+            child: Image.file(
+              File(
+                member.imagepath,
+              ),
+            ),
+            // 여기도 기본이미지 일단 사용
             width: double.infinity,
             height: 400,
           ),

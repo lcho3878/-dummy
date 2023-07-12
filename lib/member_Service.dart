@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-
 import 'main.dart';
 
 // Memo 데이터의 형식을 정해줍니다. 추후 isPinned, updatedAt 등의 정보도 저장할 수 있습니다.
@@ -11,17 +9,20 @@ class Member {
     required this.name,
     required this.mbti,
     required this.hobby,
+    required this.imagepath,
   });
 
   String name;
   String mbti;
   String hobby;
+  String imagepath;
 
   Map toJson() {
     return {
       'name': name,
       'mbti': mbti,
       'hobby': hobby,
+      'imagepath': imagepath,
     };
   }
 
@@ -30,6 +31,7 @@ class Member {
       name: json['name'],
       mbti: json['mbti'],
       hobby: json['hobby'],
+      imagepath: json['imagepath'],
     );
   }
 }
@@ -42,21 +44,22 @@ class MemberService extends ChangeNotifier {
 
   List<Member> memberlist = [
     // dummy 파일
-    Member(
-      name: '노진구',
-      mbti: 'ISTP',
-      hobby: '이슬이',
-    ),
-    Member(
-      name: '도라에몽',
-      mbti: 'ENFJ',
-      hobby: '단팥빵',
-    ),
-    Member(
-      name: '도라미',
-      mbti: 'ESTP',
-      hobby: '집안일',
-    ),
+    // Member(
+    //   name: '노진구',
+    //   mbti: 'ISTP',
+    //   hobby: '이슬이',
+
+    // ),
+    // Member(
+    //   name: '도라에몽',
+    //   mbti: 'ENFJ',
+    //   hobby: '단팥빵',
+    // ),
+    // Member(
+    //   name: '도라미',
+    //   mbti: 'ESTP',
+    //   hobby: '집안일',
+    // ),
   ];
   memberSave(
     memberService,
@@ -68,6 +71,7 @@ class MemberService extends ChangeNotifier {
     memberService.memberlist[index].name = nameController.text;
     memberService.memberlist[index].mbti = mbtiController.text;
     memberService.memberlist[index].hobby = hobbyController.text;
+
     saveMemberList();
     notifyListeners();
   }
@@ -78,19 +82,25 @@ class MemberService extends ChangeNotifier {
     notifyListeners();
   }
 
-  imagetobyte(_image) async {
-    String base64Image = "";
+  // imagetobyte(_image) async {
+  //   String base64Image = "";
 
-    if (null != _image) {
-      //_image1가 null 이 아니라면
-      final bytes = File(_image!.path).readAsBytesSync(); //image 를 byte로 불러옴
-      base64Image = base64Encode(
-          bytes); //불러온 byte를 base64 압축하여 base64Image1 변수에 저장 만약 null이였다면 가장 위에 선언된것처럼 공백으로 처리됨
-    }
-    return base64Image;
-  }
+  //   if (null != _image) {
+  //     //_image1가 null 이 아니라면
+  //     final bytes = File(_image!.path).readAsBytesSync(); //image 를 byte로 불러옴
+  //     base64Image = base64Encode(
+  //         bytes); //불러온 byte를 base64 압축하여 base64Image1 변수에 저장 만약 null이였다면 가장 위에 선언된것처럼 공백으로 처리됨
+  //   }
+  //   return base64Image;
+  // }
 
-  memberAdd(memberService, nameController, mbtiController, hobbyController) {
+  memberAdd(
+    memberService,
+    nameController,
+    mbtiController,
+    hobbyController,
+    imagepath,
+  ) {
     String name = nameController.text;
     String mbti = mbtiController.text;
     String hobby = hobbyController.text;
@@ -99,6 +109,7 @@ class MemberService extends ChangeNotifier {
       name: name,
       mbti: mbti,
       hobby: hobby,
+      imagepath: imagepath,
     );
     memberService.memberlist.add(newmember);
 
