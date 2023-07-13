@@ -126,10 +126,17 @@ class _TeamMemberState extends State<TeamMember> {
                             height: 240,
                             width: 200,
                             child: GestureDetector(
-                              child: Image.file(
-                                  File(MemberService
-                                      .memberlist[index].imagepath),
-                                  fit: BoxFit.cover), //이미지 해결전엔 일단 아무이미지
+                              child:
+                                  MemberService.memberlist[index].imagepath !=
+                                          ""
+                                      ? Image.file(
+                                          File(MemberService
+                                              .memberlist[index].imagepath),
+                                          fit: BoxFit.cover)
+                                      : Image.asset(
+                                          'images/noimage.png',
+                                          fit: BoxFit.cover,
+                                        ), //이미지 해결전엔 일단 아무이미지
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -254,6 +261,10 @@ class _MemberAddState extends State<MemberAdd> {
                       ),
                       TextButton(
                         onPressed: () {
+                          String imagepath;
+                          _image == null
+                              ? imagepath = ""
+                              : imagepath = _image!.path;
                           memberService.memberAdd(
                               memberService,
                               nameController,
@@ -261,7 +272,7 @@ class _MemberAddState extends State<MemberAdd> {
                               advantageController,
                               cooperationController,
                               blogController,
-                              _image!.path);
+                              imagepath);
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
@@ -293,9 +304,7 @@ class _MemberAddState extends State<MemberAdd> {
             child: Card(
               child: _image == null
                   ? TextButton(
-                      onPressed: () {
-                        _getImage();
-                      },
+                      onPressed: _getImage,
                       child: Text('사진추가'),
                     )
                   : GestureDetector(
@@ -332,7 +341,10 @@ class _MemberAddState extends State<MemberAdd> {
 
 //팀원 상세 설명 페이지
 class MemberDetail extends StatefulWidget {
-  MemberDetail({super.key, required this.index});
+  MemberDetail({
+    super.key,
+    required this.index,
+  });
   final int index;
 
   @override
@@ -340,19 +352,19 @@ class MemberDetail extends StatefulWidget {
 }
 
 class _MemberDetailState extends State<MemberDetail> {
+  final ImagePicker _picker = ImagePicker();
+  PickedFile? _image;
+  Future _getImage() async {
+    PickedFile? image = await _picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      if (image != null) {
+        _image = PickedFile(image.path);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ImagePicker _picker = ImagePicker();
-    PickedFile? _image;
-    Future _getImage() async {
-      PickedFile? image = await _picker.getImage(source: ImageSource.gallery);
-      setState(() {
-        if (image != null) {
-          _image = PickedFile(image.path);
-        }
-      });
-    }
-
     MemberService memberService = context.read<MemberService>();
     Member member = memberService.memberlist[widget.index];
 
@@ -401,6 +413,11 @@ class _MemberDetailState extends State<MemberDetail> {
                       ),
                       TextButton(
                         onPressed: () {
+                          String imagepath;
+                          _image != null
+                              ? imagepath = _image!.path
+                              : imagepath = member.imagepath;
+
                           memberService.memberSave(
                             memberService,
                             widget.index,
@@ -409,6 +426,7 @@ class _MemberDetailState extends State<MemberDetail> {
                             advantageController,
                             cooperationController,
                             blogController,
+                            imagepath,
                           );
                           Navigator.pop(context);
                           Navigator.pop(context);
@@ -471,14 +489,27 @@ class _MemberDetailState extends State<MemberDetail> {
       body: Column(
         children: [
           Container(
-            child: Image.file(
-              File(
-                member.imagepath,
-              ),
-            ),
-            // 여기도 기본이미지 일단 사용
             width: double.infinity,
-            height: 400,
+            height: 300,
+            child: Card(
+              child: _image != null
+                  ? GestureDetector(
+                      child: Image.file(File(_image!.path)),
+                      onTap: _getImage,
+                    )
+                  : member.imagepath == ""
+                      ? GestureDetector(
+                          child: Image.asset(
+                            'images/noimage.png',
+                            fit: BoxFit.cover,
+                          ),
+                          onTap: _getImage,
+                        )
+                      : GestureDetector(
+                          child: Image.file(File(member.imagepath)),
+                          onTap: _getImage,
+                        ),
+            ),
           ),
           TextFormField(
             controller: nameController,

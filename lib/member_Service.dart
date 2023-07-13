@@ -76,12 +76,14 @@ class MemberService extends ChangeNotifier {
     advantageController,
     cooperationController,
     blogController,
+    imagepath,
   ) {
     memberService.memberlist[index].name = nameController.text;
     memberService.memberlist[index].mbti = mbtiController.text;
     memberService.memberlist[index].advantage = advantageController.text;
     memberService.memberlist[index].cooperation = cooperationController.text;
     memberService.memberlist[index].blog = blogController.text;
+    memberService.memberlist[index].imagepath = imagepath;
 
     saveMemberList();
     notifyListeners();
